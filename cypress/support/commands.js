@@ -25,33 +25,109 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 // cypress/support/commands.js
 
-// Add this to your existing commands.js file
+// Command to authenticate with CRM using SSO
 Cypress.Commands.add('authenticateWithSso', () => {
-    // Load credentials fixture
-    cy.fixture('auth-credentials.json').then((authData) => {
-      // Visit the dashboard
-      cy.visit('/dashboard')
+  // Set preserveAuthCookies to true for this authentication process
+  Cypress.env('preserveAuthCookies', true);
+  
+  // Visit the dashboard
+  cy.visit('/dashboard');
+  
+  // Click SSO button
+  cy.get('button').contains('Sign in with SSO').click();
+  
+  // Get credentials from environment variables
+  const username = Cypress.env('AUTH_USERNAME');
+  const password = Cypress.env('AUTH_PASSWORD');
+  
+  // Handle Auth0 login form
+  cy.origin('dev-eprewkd4xyuf3khb.us.auth0.com', { args: { username, password } }, 
+    ({ username, password }) => {
+      // Wait for login form and fill credentials
+      cy.get('input[name="username"], input[type="email"]', { timeout: 20000 }).should('be.visible').type(username);
+      cy.get('input[name="password"], input[type="password"]').type(password, { log: false });
+      cy.get('button[type="submit"]').click();
       
-      // Click SSO button
-      cy.get('button').contains('Sign in with SSO').click()
-      
-      // If your SSO requires additional steps, add them here
-      // Handle redirects and form fills as needed for your specific SSO
-      
-      // Verify successful login
-      cy.get('.nav-container', { timeout: 10000 }).should('be.visible')
-    })
-  })
+      // Handle consent if needed
+      cy.get('button[value="accept"], button.auth0-lock-submit', { timeout: 10000 })
+        .should('be.visible')
+        .then($btn => {
+          if ($btn.length > 0) {
+            cy.wrap($btn).click();
+          }
+        });
+    }
+  );
+  
+  // Verify login success
+  cy.url().should('include', '/dashboard');
+  cy.get('.nav-container', { timeout: 20000 }).should('be.visible');
+});
 
-  // cypress/support/commands.js
-
-// Add this to your existing commands.js file
+// Command to authenticate by directly setting auth token
 Cypress.Commands.add('loginByAuthToken', () => {
-    cy.fixture('auth-credentials.json').then((authData) => {
-      // Set the auth token directly in localStorage
-      localStorage.setItem('authToken', authData.authToken)
-      
-      // Refresh to apply the token
-      cy.visit('/dashboard')
-    })
-  })
+  const authToken = Cypress.env('AUTH_TOKEN');
+  
+  // Set the auth token directly in localStorage
+  cy.visit('/dashboard', {
+    onBeforeLoad: (window) => {
+      window.localStorage.setItem('authToken', authToken);
+    }
+  });
+  
+  // Refresh to apply the token
+  cy.reload();
+  
+  // Verify login success
+  cy.get('.nav-container', { timeout: 20000 }).should('be.visible');
+});
+
+// Command to navigate to a CRM module
+Cypress.Commands.add('navigateToCrmModule', (module) => {
+  cy.get(`a`).contains(new RegExp(`^${module}$`, 'i')).click();
+  cy.contains(`${module} Dashboard`, { matchCase: false }).should('be.visible');
+});
+
+// Command to test main website navigation
+Cypress.Commands.add('navigateToWebsiteSection', (section) => {
+  cy.get(`a[href*="#${section}"]`).first().click();
+  cy.get(`#${section}`).should('be.visible');
+});
+
+// Command to test responsive behavior
+Cypress.Commands.add('setViewportAndTest', (width, height, element, shouldBeVisible) => {
+  cy.viewport(width, height);
+  if (shouldBeVisible) {
+    cy.get(element).should('be.visible');
+  } else {
+    cy.get(element).should('not.be.visible');
+  }
+});
+
+// Command to fill the quote form
+Cypress.Commands.add('fillQuoteForm', (formData) => {
+  // Fill package quantities
+  if (formData.packages) {
+    Object.entries(formData.packages).forEach(([type, quantity]) => {
+      cy.get(`#${type}-quantity`).clear().type(quantity.toString());
+    });
+  }
+  
+  // Fill customer info
+  cy.get('#quote-name').clear().type(formData.name);
+  cy.get('#quote-email').clear().type(formData.email);
+  cy.get('#quote-phone').clear().type(formData.phone);
+  cy.get('#quote-company').clear().type(formData.company);
+  
+  // Fill shipping info
+  cy.get('#pickup-zip').clear().type(formData.pickupZip);
+  cy.get('#delivery-zip').clear().type(formData.deliveryZip);
+  cy.get('#pickup-date').clear().type(formData.pickupDate);
+  
+  if (formData.deliveryDate) {
+    cy.get('#delivery-date').clear().type(formData.deliveryDate);
+  }
+  
+  // Select delivery speed
+  cy.get('#delivery-speed').select(formData.deliverySpeed);
+});

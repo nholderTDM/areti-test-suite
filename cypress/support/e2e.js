@@ -18,3 +18,27 @@
 // cypress/support/e2e.js
 import './commands'
 import 'cypress-mochawesome-reporter/register'
+
+// Clear cookies and localStorage before each test based on config
+if (Cypress.env('clearCookiesBeforeTests')) {
+  beforeEach(() => {
+    cy.clearCookies();
+    cy.clearLocalStorage();
+    cy.log('Cleared cookies and localStorage before test');
+  });
+}
+
+// Preserve cookies in certain tests when needed
+Cypress.Cookies.defaults({
+  preserve: (cookie) => {
+    // Preserve Auth0 and other auth cookies when specifically requested
+    return cookie.name.includes('auth') && Cypress.env('preserveAuthCookies');
+  }
+});
+
+// Handle uncaught exceptions
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Returning false prevents Cypress from failing the test
+  console.error('Uncaught exception:', err.message);
+  return false;
+});

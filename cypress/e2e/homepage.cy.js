@@ -1,31 +1,72 @@
-// cypress/e2e/home_page_spec.cy.js
-describe('Home Page Tests', () => {
+describe('Homepage Tests', () => {
   beforeEach(() => {
-    // Visit the home page before each test
-    cy.visit('/')
-  })
+    // Visit homepage before each test
+    cy.visit('/');
+  });
 
-  it('should have the correct title', () => {
-    // Test that the page title contains the expected text
-    cy.title().should('include', 'Areti Alliance')
-  })
+  it('should have correct title and meta information', () => {
+    // Check page title
+    cy.title().should('include', 'Areti Alliance');
+    
+    // Check meta description exists
+    cy.get('meta[name="description"]').should('exist');
+  });
 
-  it('should have a visible logo', () => {
-    // Test that the logo is visible
-    cy.get('.logo').should('be.visible')
-  })
+  it('should have visible logo and navigation', () => {
+    // Check logo is visible
+    cy.get('.logo').should('be.visible');
+    
+    // Check main navigation is visible
+    cy.get('nav ul').should('be.visible');
+    cy.get('nav ul li').should('have.length.at.least', 4);
+  });
 
-  it('should navigate to Services section when clicking Services link', () => {
-    // Test navigation to Services section
-    cy.get('a[href*="#services"]').first().click()
-    cy.get('#services').should('be.visible')
-  })
+  it('should navigate to all main sections', () => {
+    // Test navigation to each main section
+    const sections = ['home', 'services', 'drivers', 'about', 'contact'];
+    
+    sections.forEach(section => {
+      cy.navigateToWebsiteSection(section);
+      // Take screenshot of each section
+      cy.screenshot(`homepage-${section}-section`);
+    });
+  });
 
-  it('should show the quote calculator form', () => {
-    // Test that the quote calculator form exists and is functional
-    cy.get('#quote-form').should('exist')
-    cy.get('#pickup-zip').type('30309')
-    cy.get('#delivery-zip').type('30328')
-    // Additional form interaction can be added here
-  })
-})
+  it('should have a functional hero section with CTA button', () => {
+    // Check hero section content
+    cy.get('.hero').within(() => {
+      cy.get('h1, h2').should('be.visible');
+      cy.get('p').should('be.visible');
+      cy.get('.btn').should('be.visible').and('contain.text', 'Get a Quote');
+    });
+    
+    // Test CTA button
+    cy.get('#get-quote-btn').click();
+    cy.get('.quote-calculator').should('be.visible');
+  });
+
+  it('should display features section properly', () => {
+    // Check features section content
+    cy.get('.features-section').should('exist');
+    cy.get('.feature-card').should('have.length.at.least', 3);
+    
+    // Check first feature card content
+    cy.get('.feature-card').first().within(() => {
+      cy.get('.feature-icon').should('be.visible');
+      cy.get('h3').should('be.visible');
+      cy.get('p').should('be.visible');
+    });
+  });
+
+  it('should show testimonials section', () => {
+    // Check testimonials section
+    cy.get('.testimonials').should('exist');
+    cy.get('.testimonial-card').should('have.length.at.least', 1);
+    
+    // Check first testimonial content
+    cy.get('.testimonial-card').first().within(() => {
+      cy.get('.testimonial-content p').should('be.visible');
+      cy.get('.testimonial-author').should('be.visible');
+    });
+  });
+});
