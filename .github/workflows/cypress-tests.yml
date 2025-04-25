@@ -11,6 +11,10 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2]  # Extra bracket removed
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,15 +53,23 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
-          browser: chrome
-          record: false
+          browser: firefox
+          record: true        # You need a Cypress Dashboard account for this
+          parallel: true      # Enable parallelization
+          group: UI-Tests     # Name of the test group (hyphens instead of spaces)
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           spec: "cypress/e2e/**/*.cy.js"
+        env:
+          # Pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pass Cypress Dashboard record key
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
       
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-report
+          name: cypress-report-${{ matrix.containers }}
           path: |
             cypress/reports
             cypress/screenshots

@@ -2,6 +2,7 @@ const { defineConfig } = require("cypress");
 const webpackConfig = require('./cypress/webpack.config.js');
 
 module.exports = defineConfig({
+  projectId: '4af4fb86-d18d-400f-bc6f-b2ee29582448',
   e2e: {
     baseUrl: 'https://aretialliance.com', // Point to main website
     specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx}",
