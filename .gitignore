@@ -1,0 +1,14 @@
+# Node modules
+node_modules/
+
+# Cypress generated files
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+cypress/reports/
+
+# Auth credentials
+cypress/fixtures/auth-credentials.json
+
+# Environment variables
+.env
