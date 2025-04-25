@@ -17,7 +17,7 @@
 
 // cypress/support/e2e.js
 import './commands'
-import 'cypress-mochawesome-reporter/register'
+//import 'cypress-mochawesome-reporter/register'
 
 // Clear cookies and localStorage before each test based on config
 if (Cypress.env('clearCookiesBeforeTests')) {
