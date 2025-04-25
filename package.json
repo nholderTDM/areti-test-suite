@@ -7,32 +7,9 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "test:website": "cypress run --env appTarget=website --spec 'cypress/e2e/website/**/*.cy.js'",
-    "test:crm": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/**/*.cy.js'",
-    "test:crm:auth": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/auth/**/*.cy.js'",
-    "test:crm:contacts": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/contacts/**/*.cy.js'",
-    "test:crm:tasks": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/tasks/**/*.cy.js'",
-    "test:crm:organizations": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/organizations/**/*.cy.js'",
-    "test:component:website": "cypress run --component --spec 'cypress/component/website/**/*.cy.{js,jsx}'",
-    "test:component:crm": "cypress run --component --spec 'cypress/component/crm/**/*.cy.{js,jsx}'",
-    "test:regression": "npm run test:website && npm run test:crm",
-    "test:all": "npm run test:regression && npm run test:component:website && npm run test:component:crm"
-  },
-  "keywords": [
-    "cypress",
-    "testing",
-    "e2e",
-    "component",
-    "crm",
-    "website"
-  ],
-  "author": "",
-  "license": "ISC",
+    "test:crm": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/**/*.cy.js'"
+    },
   "devDependencies": {
-    "@cypress/react": "^5.12.5",
-    "@cypress/webpack-dev-server": "^1.8.4",
-    "cypress": "^13.1.0",
-    "cypress-mochawesome-reporter": "^3.8.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "cypress": "^13.6.0"
   }
 }
