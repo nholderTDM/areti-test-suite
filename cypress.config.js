@@ -3,17 +3,17 @@ const webpackConfig = require('./cypress/webpack.config.js');
 
 module.exports = defineConfig({
   projectId: '4af4fb86-d18d-400f-bc6f-b2ee29582448',
+  reporter: 'spec', // Change to a simple reporter for now
   e2e: {
-    baseUrl: 'https://aretialliance.com', // Default to main website
-    specPattern: "cypress/e2e/**/*.cy.js",
+    baseUrl: 'https://aretialliance.com', // Point to main website
+    specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx}",
     supportFile: "cypress/support/e2e.js",
     viewportWidth: 1280,
     viewportHeight: 720,
-    video: true,
+    video: false,
     screenshotOnRunFailure: true,
-    experimentalStudio: true,
-    experimentalRunAllSpecs: true,
     setupNodeEvents(on, config) {
+      // implement node event listeners here
       // Access environment variables
       const testEnv = process.env.TEST_ENV || 'website';
       
@@ -38,7 +38,7 @@ module.exports = defineConfig({
     },
     viewportWidth: 1280,
     viewportHeight: 720,
-    specPattern: "cypress/component/**/*.cy.{js,jsx,ts,tsx}",
+    specPattern: "cypress/component/**/*.{js,jsx,ts,tsx}",
   },
   env: {
     // Global environment variables
