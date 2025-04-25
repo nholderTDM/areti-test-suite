@@ -1,5 +1,5 @@
 const { defineConfig } = require("cypress");
-const webpackConfig = require('./cypress/webpack.config.js');
+// const webpackConfig = require('./cypress/webpack.config.js');
 
 module.exports = defineConfig({
   projectId: '4af4fb86-d18d-400f-bc6f-b2ee29582448',

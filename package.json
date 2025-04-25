@@ -6,10 +6,13 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:website": "cypress run --env appTarget=website --spec 'cypress/e2e/website/**/*.cy.js'",
-    "test:crm": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/**/*.cy.js'"
-    },
+    "test:website": "cypress run --spec \"cypress/e2e/website/**/*.cy.js\"",
+    "test:crm": "cypress run --spec \"cypress/e2e/crm/**/*.cy.js\""
+  },
   "devDependencies": {
-    "cypress": "^13.17.0"
+    "@cypress/react": "^7.0.0",
+    "cypress": "^13.17.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
