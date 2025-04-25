@@ -68,8 +68,8 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           browser: firefox
-          record: true
-          parallel: true
+          record: false
+          parallel: false
           group: UI-Tests
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           spec: "cypress/e2e/**/*.cy.js"
