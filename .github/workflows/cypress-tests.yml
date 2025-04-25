@@ -11,6 +11,12 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    # Add this permission block to allow the action to access the repository
+    permissions:
+      contents: read
+      id-token: write
+      checks: write
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +56,13 @@ jobs:
             }
           }
           EOF
-      
+
+      - name: Create artifact directories
+        run: |
+          mkdir -p cypress/reports
+          mkdir -p cypress/screenshots
+          mkdir -p cypress/videos
+
       - name: Cypress run
         id: cypress
         uses: cypress-io/github-action@v6
