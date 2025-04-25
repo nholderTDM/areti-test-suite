@@ -74,3 +74,39 @@ jobs:
             cypress/reports
             cypress/screenshots
             cypress/videos
+            - name: Send notification on failure
+            if: steps.cypress.outcome != 'success'
+            uses: slackapi/slack-github-action@v1.24.0
+            with:
+              payload: |
+                {
+                  "text": "❌ Cypress Tests Failed!",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "❌ Cypress Tests Failed",
+                        "emoji": true
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "⏱️ *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                      }
+                    }
+                  ]
+                }
+            env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+              SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK    
+            
