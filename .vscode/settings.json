@@ -1,0 +1,4 @@
+{
+    "yaml.validate": false,
+    "github-actions.workflows.pinned.workflows": [".github/workflows/cypress-tests.yml"]
+  }
