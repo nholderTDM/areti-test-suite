@@ -13,9 +13,9 @@ module.exports = defineConfig({
     screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
       // implement node event listeners here
-    },
+    }
   },
-  component: {
+component: {
     devServer: {
       framework: "react",
       bundler: "webpack",

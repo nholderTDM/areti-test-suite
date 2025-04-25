@@ -1,4 +1,4 @@
-name: Cypress Tests (Simplified)
+name: Cypress E2E Tests
 
 on:
   push:
@@ -32,13 +32,21 @@ jobs:
           mkdir -p cypress/reports
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
+          mkdir -p cypress/e2e
+      
+      - name: Create sample test file if none exists
+        run: |
+          if [ ! -f cypress/e2e/sample.cy.js ]; then
+            mkdir -p cypress/e2e
+            echo "describe('Sample Test', () => { it('passes', () => { cy.visit('https://example.com'); cy.contains('Example Domain').should('be.visible'); }); });" > cypress/e2e/sample.cy.js
+          fi
       
       - name: Cypress run
         id: cypress
         uses: cypress-io/github-action@v6
         with:
           browser: firefox
-          record: false  # Disable recording
+          config-file: cypress.config.js
           spec: "cypress/e2e/**/*.cy.js"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,3 +60,39 @@ jobs:
             cypress/reports
             cypress/screenshots
             cypress/videos
+      
+      - name: Send notification on failure
+        if: steps.cypress.outcome != 'success'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ Cypress Tests Failed!",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Cypress Tests Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⏱️ *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
