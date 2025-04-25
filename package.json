@@ -1,32 +1,48 @@
 {
   "name": "areti-test-suite",
   "version": "1.0.0",
+  "description": "Automated test suite for Areti Alliance website and CRM dashboard",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:e2e": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
-    "test:component": "cypress run --component",
-    "test:all": "npm run test:e2e && npm run test:component"
+    "test:website": "cypress run --env appTarget=website --spec 'cypress/e2e/website/**/*.cy.js'",
+    "test:crm": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/**/*.cy.js'",
+    "test:crm:auth": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/auth/**/*.cy.js'",
+    "test:crm:contacts": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/contacts/**/*.cy.js'",
+    "test:crm:tasks": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/tasks/**/*.cy.js'",
+    "test:crm:organizations": "cypress run --env appTarget=crm --spec 'cypress/e2e/crm/organizations/**/*.cy.js'",
+    "test:component:website": "cypress run --component --spec 'cypress/component/website/**/*.cy.{js,jsx}'",
+    "test:component:crm": "cypress run --component --spec 'cypress/component/crm/**/*.cy.{js,jsx}'",
+    "test:regression": "npm run test:website && npm run test:crm",
+    "test:all": "npm run test:regression && npm run test:component:website && npm run test:component:crm"
   },
-  "keywords": [],
+  "keywords": [
+    "cypress",
+    "testing",
+    "e2e",
+    "component",
+    "crm",
+    "website"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@babel/core": "^7.26.10",
-    "@babel/preset-env": "^7.26.9",
-    "@babel/preset-react": "^7.26.3",
-    "@babel/preset-typescript": "^7.27.0",
-    "@cypress/react": "^9.0.1",
-    "@cypress/webpack-dev-server": "^4.0.2",
-    "babel-loader": "^10.0.0",
-    "css-loader": "^7.1.2",
-    "cypress": "^14.3.2",
-    "html-webpack-plugin": "^5.6.3",
-    "postcss-loader": "^8.1.1",
-    "style-loader": "^4.0.0",
-    "webpack": "^5.99.7"
-  }
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "@cypress/react": "^5.12.5",
+    "@cypress/webpack-dev-server": "^1.8.4",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^6.8.1",
+    "cypress": "^13.1.0",
+    "postcss-loader": "^7.3.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.88.1",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {}
 }

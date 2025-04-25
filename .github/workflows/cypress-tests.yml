@@ -1,98 +1,90 @@
-name: Cypress E2E Tests
+name: Cypress Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main]
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - website
+          - crm
+          - component
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-      checks: write
-      pull-requests: write
+    strategy:
+      matrix:
+        # Define test suites based on input or default to all
+        test_suite: ${{ fromJSON(github.event.inputs.test_type == 'all' && '["website", "crm", "component"]' || format('["{}"]', github.event.inputs.test_type || 'all')) }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: './areti-test-suite/package-lock.json'
       
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        run: cd areti-test-suite && npm ci
       
-      - name: Create artifact directories
+      - name: Create cypress.env.json
         run: |
-          mkdir -p cypress/reports
-          mkdir -p cypress/screenshots
-          mkdir -p cypress/videos
-          mkdir -p cypress/e2e
+          echo '{
+            "AUTH_USERNAME": "${{ secrets.AUTH_USERNAME }}",
+            "AUTH_PASSWORD": "${{ secrets.AUTH_PASSWORD }}",
+            "AUTH_TOKEN": "${{ secrets.AUTH_TOKEN }}"
+          }' > ./areti-test-suite/cypress.env.json
       
-      - name: Create sample test file if none exists
-        run: |
-          if [ ! -f cypress/e2e/sample.cy.js ]; then
-            mkdir -p cypress/e2e
-            echo "describe('Sample Test', () => { it('passes', () => { cy.visit('https://example.com'); cy.contains('Example Domain').should('be.visible'); }); });" > cypress/e2e/sample.cy.js
-          fi
-      
-      - name: Cypress run
-        id: cypress
+      # Run website E2E tests
+      - name: Run Website Tests
+        if: matrix.test_suite == 'website' || matrix.test_suite == 'all'
         uses: cypress-io/github-action@v6
         with:
-          browser: firefox
-          config-file: cypress.config.js
-          spec: "cypress/e2e/**/*.cy.js"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: areti-test-suite
+          command: npm run test:website
       
-      - name: Archive test results
+      # Run CRM E2E tests
+      - name: Run CRM Tests
+        if: matrix.test_suite == 'crm' || matrix.test_suite == 'all'
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: areti-test-suite
+          command: npm run test:crm
+      
+      # Run component tests
+      - name: Run Component Tests
+        if: matrix.test_suite == 'component' || matrix.test_suite == 'all'
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: areti-test-suite
+          command: npm run test:component:website && npm run test:component:crm
+      
+      # Upload artifacts on failure
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ matrix.test_suite }}
+          path: areti-test-suite/cypress/screenshots
+          if-no-files-found: ignore
+      
+      - name: Upload Videos
+        uses: actions/upload-artifact@v3
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: cypress-report
-          path: |
-            cypress/reports
-            cypress/screenshots
-            cypress/videos
-      
-      - name: Send notification on failure
-        if: steps.cypress.outcome != 'success'
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "❌ Cypress Tests Failed!",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "❌ Cypress Tests Failed",
-                    "emoji": true
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "⏱️ *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          name: cypress-videos-${{ matrix.test_suite }}
+          path: areti-test-suite/cypress/videos
+          if-no-files-found: ignore
