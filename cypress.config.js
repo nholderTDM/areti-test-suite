@@ -1,12 +1,14 @@
 const { defineConfig } = require("cypress");
+const webpackConfig = require('./cypress/webpack.config.js');
 
 module.exports = defineConfig({
-  projectId: 'skab56',
   e2e: {
-    baseUrl: 'https://aretialliance.com', // Replace with your actual domain
+    baseUrl: 'https://aretialliance.com', // Point to main website
+    specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx}",
+    supportFile: "cypress/support/e2e.js",
     viewportWidth: 1280,
     viewportHeight: 720,
-    video: false, // Set to true if you want video recordings
+    video: false,
     screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
       // implement node event listeners here
@@ -16,6 +18,10 @@ module.exports = defineConfig({
     devServer: {
       framework: "react",
       bundler: "webpack",
+      webpackConfig
     },
+    viewportWidth: 1280,
+    viewportHeight: 720,
+    specPattern: "cypress/component/**/*.{js,jsx,ts,tsx}",
   },
 });
