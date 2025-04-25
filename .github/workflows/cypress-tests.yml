@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2]  # Extra bracket removed
+        containers: [1, 2]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,18 +52,17 @@ jobs:
           EOF
       
       - name: Cypress run
-        uses: cypress-io/github-action@6
+        id: cypress
+        uses: cypress-io/github-action@v6
         with:
           browser: firefox
-          record: true        # You need a Cypress Dashboard account for this
-          parallel: true      # Enable parallelization
-          group: UI-Tests     # Name of the test group (hyphens instead of spaces)
+          record: true
+          parallel: true
+          group: UI-Tests
           ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
           spec: "cypress/e2e/**/*.cy.js"
         env:
-          # Pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Pass Cypress Dashboard record key
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
       
       - name: Archive test results
@@ -75,39 +74,39 @@ jobs:
             cypress/reports
             cypress/screenshots
             cypress/videos
-            - name: Send notification on failure
-            if: steps.cypress.outcome != 'success'
-            uses: slackapi/slack-github-action@v1.24.0
-            with:
-              payload: |
+      
+      - name: Send notification on failure
+        if: steps.cypress.outcome != 'success'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ Cypress Tests Failed!",
+              "blocks": [
                 {
-                  "text": "❌ Cypress Tests Failed!",
-                  "blocks": [
-                    {
-                      "type": "header",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "❌ Cypress Tests Failed",
-                        "emoji": true
-                      }
-                    },
-                    {
-                      "type": "section",
-                      "text": {
-                        "type": "mrkdwn",
-                        "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
-                      }
-                    },
-                    {
-                      "type": "section",
-                      "text": {
-                        "type": "mrkdwn",
-                        "text": "⏱️ *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
-                      }
-                    }
-                  ]
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Cypress Tests Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⏱️ *Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                  }
                 }
-            env:
-              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-              SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK    
-            
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
