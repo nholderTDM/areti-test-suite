@@ -19,6 +19,22 @@
 import './commands'
 //import 'cypress-mochawesome-reporter/register'
 
+// Better handling of uncaught exceptions and failures
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Log the error for debugging
+  console.error('Uncaught exception:', err.message);
+  
+  // Returning false prevents Cypress from failing the test
+  // You can add specific error message checks here
+  return false;
+});
+
+// Log additional information about tests
+Cypress.on('test:before:run', (attributes) => {
+  const testTitle = attributes.title;
+  console.log(`Running test: "${testTitle}"`);
+});
+
 // Clear cookies and localStorage before each test based on config
 if (Cypress.env('clearCookiesBeforeTests')) {
   beforeEach(() => {
@@ -36,9 +52,16 @@ Cypress.Cookies.defaults({
   }
 });
 
-// Handle uncaught exceptions
-Cypress.on('uncaught:exception', (err, runnable) => {
-  // Returning false prevents Cypress from failing the test
-  console.error('Uncaught exception:', err.message);
-  return false;
+// Add a viewport check at the start of each test
+beforeEach(() => {
+  // Check if we're in a mobile or responsive test
+  const testTitle = Cypress.currentTest.title.toLowerCase();
+  
+  if (testTitle.includes('mobile') || testTitle.includes('responsive')) {
+    cy.viewport('iphone-x');
+    cy.log('Set viewport to mobile for responsive/mobile test');
+  } else {
+    // Use the default viewport from config
+    cy.log('Using default viewport from configuration');
+  }
 });

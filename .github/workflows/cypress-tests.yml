@@ -22,6 +22,8 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     strategy:
+      # Don't fail fast - let all test suites run even if one fails
+      fail-fast: false
       matrix:
         # Define test suites based on input or default to all
         test_suite: ${{ fromJSON(github.event.inputs.test_type == 'all' && '["website", "crm", "component"]' || format('["{}"]', github.event.inputs.test_type || 'all')) }}
@@ -35,42 +37,47 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: './areti-test-suite/package-lock.json'
+          cache-dependency-path: './package-lock.json'
+      
+      - name: Install Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
       
       - name: Install Dependencies
-        run: cd areti-test-suite && npm ci
-      
+        run: npm ci
+        
       - name: Create cypress.env.json
         run: |
           echo '{
             "AUTH_USERNAME": "${{ secrets.AUTH_USERNAME }}",
             "AUTH_PASSWORD": "${{ secrets.AUTH_PASSWORD }}",
             "AUTH_TOKEN": "${{ secrets.AUTH_TOKEN }}"
-          }' > ./areti-test-suite/cypress.env.json
+          }' > ./cypress.env.json
       
       # Run website E2E tests
       - name: Run Website Tests
         if: matrix.test_suite == 'website' || matrix.test_suite == 'all'
         uses: cypress-io/github-action@v6
         with:
-          working-directory: areti-test-suite
           command: npm run test:website
+          browser: firefox
       
       # Run CRM E2E tests
       - name: Run CRM Tests
         if: matrix.test_suite == 'crm' || matrix.test_suite == 'all'
         uses: cypress-io/github-action@v6
         with:
-          working-directory: areti-test-suite
           command: npm run test:crm
+          browser: firefox
       
       # Run component tests
       - name: Run Component Tests
         if: matrix.test_suite == 'component' || matrix.test_suite == 'all'
         uses: cypress-io/github-action@v6
         with:
-          working-directory: areti-test-suite
           command: npm run test:component:website && npm run test:component:crm
+          browser: firefox
       
       # Upload artifacts on failure
       - name: Upload Screenshots
@@ -78,7 +85,7 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots-${{ matrix.test_suite }}
-          path: areti-test-suite/cypress/screenshots
+          path: cypress/screenshots
           if-no-files-found: ignore
       
       - name: Upload Videos
@@ -86,5 +93,5 @@ jobs:
         if: always()
         with:
           name: cypress-videos-${{ matrix.test_suite }}
-          path: areti-test-suite/cypress/videos
+          path: cypress/videos
           if-no-files-found: ignore

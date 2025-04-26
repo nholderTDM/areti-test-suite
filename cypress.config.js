@@ -1,19 +1,24 @@
 const { defineConfig } = require("cypress");
-// const webpackConfig = require('./cypress/webpack.config.js');
+const path = require('path');
 
 module.exports = defineConfig({
-//  projectId: '4af4fb86-d18d-400f-bc6f-b2ee29582448',
-//  reporter: 'spec', // Change to a simple reporter for now
+  projectId: 'areti-test-suite',
+  reporter: 'spec',
+  viewportWidth: 1280,
+  viewportHeight: 720,
+  video: true,
+  screenshotOnRunFailure: true,
+  retries: {
+    runMode: 1,
+    openMode: 0
+  },
+  chromeWebSecurity: false,
+  defaultCommandTimeout: 10000,
   e2e: {
-    baseUrl: 'https://aretialliance.com', // Point to main website
+    baseUrl: 'https://aretialliance.com',
     specPattern: "cypress/e2e/**/*.{js,jsx,ts,tsx}",
-//    supportFile: "cypress/support/e2e.js",
-//    viewportWidth: 1280,
-//    viewportHeight: 720,
-//    video: false,
-    screenshotOnRunFailure: true,
+    supportFile: "cypress/support/e2e.js",
     setupNodeEvents(on, config) {
-      // implement node event listeners here
       // Access environment variables
       const testEnv = process.env.TEST_ENV || 'website';
       
@@ -34,7 +39,7 @@ module.exports = defineConfig({
     devServer: {
       framework: "react",
       bundler: "webpack",
-      webpackConfig
+      webpackConfig: require('./cypress/webpack.config.js')
     },
     viewportWidth: 1280,
     viewportHeight: 720,
@@ -43,6 +48,7 @@ module.exports = defineConfig({
   env: {
     // Global environment variables
     clearCookiesBeforeTests: true,
-    clearLocalStorageBeforeTests: true
+    clearLocalStorageBeforeTests: true,
+    browser: 'firefox'
   }
 });

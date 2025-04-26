@@ -6,13 +6,32 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:website": "cypress run --spec \"cypress/e2e/website/**/*.cy.js\"",
-    "test:crm": "cypress run --spec \"cypress/e2e/crm/**/*.cy.js\""
+    "cy:run:firefox": "cypress run --browser firefox",
+    "test:website": "cypress run --browser firefox --spec \"cypress/e2e/website/**/*.cy.js\"",
+    "test:crm": "cypress run --browser firefox --spec \"cypress/e2e/crm/**/*.cy.js\"",
+    "test:crm:auth": "cypress run --browser firefox --spec \"cypress/e2e/crm/auth/*.cy.js\"",
+    "test:crm:contacts": "cypress run --browser firefox --spec \"cypress/e2e/crm/contacts/*.cy.js\"",
+    "test:crm:tasks": "cypress run --browser firefox --spec \"cypress/e2e/crm/tasks/*.cy.js\"",
+    "test:crm:organizations": "cypress run --browser firefox --spec \"cypress/e2e/crm/organizations/*.cy.js\"",
+    "test:component:website": "cypress run --browser firefox --component --spec \"cypress/component/website/**/*.cy.js,cypress/component/website/**/*.cy.jsx\"",
+    "test:component:crm": "cypress run --browser firefox --component --spec \"cypress/component/crm/**/*.cy.js,cypress/component/crm/**/*.cy.jsx\"",
+    "test:regression": "cypress run --browser firefox --spec \"cypress/e2e/**/*.cy.js\"",
+    "test:all": "npm run test:website && npm run test:crm && npm run test:component:website && npm run test:component:crm"
   },
   "devDependencies": {
     "@cypress/react": "^7.0.0",
+    "@cypress/webpack-dev-server": "^2.0.0",
     "cypress": "^13.17.0",
+    "path": "^0.12.7",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "webpack": "^5.88.0",
+    "babel-loader": "^9.1.2",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "style-loader": "^3.3.3",
+    "css-loader": "^6.8.1",
+    "postcss-loader": "^7.3.3"
   }
 }
